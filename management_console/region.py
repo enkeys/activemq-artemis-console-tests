@@ -1,9 +1,13 @@
-class Region(object):
+from selenium.webdriver import Remote
+
+from management_console import Page
+
+
+class Region(Page):
     _root_locator = None
 
-    def __init__(self, base_url, selenium, root=None):
-        self.base_url = base_url
-        self.selenium = selenium
+    def __init__(self, base_url, selenium: Remote, open_url=False, root=None, **kwargs):
+        super().__init__(base_url, selenium, open_url=open_url, **kwargs)
         self.root_element = root
 
     @property

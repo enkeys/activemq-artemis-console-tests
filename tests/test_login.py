@@ -1,20 +1,30 @@
 import pytest
-from pages.login import LoginPage
+
+from management_console.pages.hawtio_login import HawtioLogin
+from management_console.plugins.artemis import ArtemisPlugin
 
 
 @pytest.mark.nondestructive
-def test_login_valid(base_url: str, selenium, variables):
+@pytest.mark.webtest
+def test_login_valid(base_url, selenium, variables):
     """
     Users can log in
     @type base_url: string
     @type selenium:
     @type variables: strings
     """
-    login_page = LoginPage(base_url, selenium)
-    login_page.login(variables['username'], variables['password'])
+    login_page = HawtioLogin(base_url, selenium)
+    hawtio_app = login_page.login(variables['username'], variables['password'])
+
+    # Expected ArtemisPlugin
+    assert ArtemisPlugin(base_url, selenium).is_the_current_page
+
+    assert hawtio_app.is_the_current_page
+    assert "Current Status" in hawtio_app.heading
 
 
 @pytest.mark.nondestructive
+@pytest.mark.webtest
 def test_login_invalid_password(base_url, selenium, variables):
     """
     Users cannot login with wrong password
@@ -22,12 +32,19 @@ def test_login_invalid_password(base_url, selenium, variables):
     @type selenium:
     @type variables: strings
     """
-    login_page = LoginPage(base_url, selenium)
-    login_page.login(variables['username'], variables['password'] + 'x')
+    login_page = HawtioLogin(base_url, selenium)
+    hawtio_app = login_page.login(variables['username'], variables['password'] + 'x')
+
+    # Expected ArtemisPlugin
+    assert not ArtemisPlugin(base_url, selenium).is_the_current_page
+
+    assert not hawtio_app.is_the_current_page
     assert login_page.is_forbidden
+    assert login_page.is_the_current_page
 
 
 @pytest.mark.nondestructive
+@pytest.mark.webtest
 def test_login_invalid_username(base_url, selenium, variables):
     """
     Attempt to log in with an invalid username
@@ -35,12 +52,19 @@ def test_login_invalid_username(base_url, selenium, variables):
     @type selenium:
     @type variables: strings
     """
-    login_page = LoginPage(base_url, selenium)
-    login_page.login(variables['username'] + 'x', variables['password'])
+    login_page = HawtioLogin(base_url, selenium)
+    hawtio_app = login_page.login(variables['username'] + 'x', variables['password'])
+
+    # Expected ArtemisPlugin
+    assert not ArtemisPlugin(base_url, selenium).is_the_current_page
+
+    assert not hawtio_app.is_the_current_page
     assert login_page.is_forbidden
+    assert login_page.is_the_current_page
 
 
 @pytest.mark.nondestructive
+@pytest.mark.webtest
 def test_login_invalid_password_username(base_url, selenium, variables):
     """
     Users cannot login with wrong password
@@ -48,19 +72,12 @@ def test_login_invalid_password_username(base_url, selenium, variables):
     @type selenium:
     @type variables: strings
     """
-    login_page = LoginPage(base_url, selenium)
-    login_page.login(variables['username'] + 'x', variables['password'] + 'x')
+    login_page = HawtioLogin(base_url, selenium)
+    hawtio_app = login_page.login(variables['username'] + 'x', variables['password'] + 'x')
+
+    # Expected ArtemisPlugin
+    assert not ArtemisPlugin(base_url, selenium).is_the_current_page
+
+    assert not hawtio_app.is_the_current_page
     assert login_page.is_forbidden
-
-
-@pytest.mark.nondestructive
-def test_logout(base_url, selenium, variables):
-    """
-    Users can logout
-    @type base_url: string
-    @type selenium:
-    @type variables: strings
-    """
-    login_page = LoginPage(base_url, selenium)
-    login_page.login(variables['username'], variables['password'])
-    assert 'welcome' in login_page.get_url_current_page()
+    assert login_page.is_the_current_page

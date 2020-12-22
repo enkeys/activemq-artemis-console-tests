@@ -4,19 +4,24 @@ from selenium.webdriver import Remote
 from selenium.webdriver.support.ui import WebDriverWait
 
 
-class Page(object):
+class Page:
     """
     Page class
     """
     _url = None
 
-    def __init__(self, base_url, selenium: Remote, **kwargs):
+    def __init__(self, base_url: str, selenium: Remote, open_url=True, **kwargs):
         """Page constructor"""
         self.base_url = base_url
         self.selenium = selenium
         self.timeout = 10
         self.wait = WebDriverWait(self.selenium, self.timeout)
         self.kwargs = kwargs
+
+        if open_url:
+            self.open()
+        else:
+            self.wait_for_page_to_load()
 
     @property
     def url(self):
@@ -28,18 +33,16 @@ class Page(object):
             return self._url.format(base_url=self.base_url, **self.kwargs)
         return self.base_url
 
-    def get_url(self, url):
+    def get_url(self, url: url):
         self.selenium.get(url)
 
     def get_url_current_page(self):
-        self.wait_for_angular()
         return self.selenium.current_url
 
     def open(self):
         """Open page"""
         self.selenium.get(self.url)
         self.wait_for_page_to_load()
-        self.wait_for_angular()
         return self
 
     def wait_for_page_to_load(self):
@@ -60,6 +63,22 @@ class Page(object):
         self.selenium.set_script_timeout(self.timeout)
         self.selenium.execute_async_script(script=script_wait)
         return self
+
+    @property
+    def page_title(self):
+        """Page title"""
+        WebDriverWait(self.selenium, self.timeout).until(
+            lambda s: self.selenium.title
+        )
+        return self.selenium.title
+
+    @property
+    def is_the_current_page(self):
+        if self.url in self.get_url_current_page():
+
+            return True
+        else:
+            return False
 
     def wait_for_element_presented(self, *locator):
         self.wait.until(lambda s: self.is_element_present(*locator))

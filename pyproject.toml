@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+markers = [
+    "long: marks tests as long running (deselect with '-m \"not long\"')",
+    "webtest: marks webtest",
+    "nondestructive: marks non-destructive",
+]
